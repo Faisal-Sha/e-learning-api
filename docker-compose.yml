@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  course-service:
+    build: ./course-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - aladia-net
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "3001:3001"
+    networks:
+      - aladia-net
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3002:3002"
+    depends_on:
+      - course-service
+      - auth-service
+    networks:
+      - aladia-net
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - aladia-net
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - aladia-net
+
+networks:
+  aladia-net:
+    driver: bridge
