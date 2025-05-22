@@ -4,11 +4,19 @@ import { CourseService } from './course.service';
 import { CourseRepository } from './course.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Course, CourseSchema } from './course.schema';
-import { RedisService } from '../redis/redis.service';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }])],
+  imports: [
+    MongooseModule.forRootAsync({
+      useFactory: async () => ({
+        uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/courses',
+      }),
+    }),
+    MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]),
+    RedisModule,
+  ],
   controllers: [CourseController],
-  providers: [CourseService, CourseRepository, RedisService],
+  providers: [CourseService, CourseRepository],
 })
 export class CourseModule {}

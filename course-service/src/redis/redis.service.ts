@@ -3,10 +3,18 @@ import { createClient } from 'redis';
 
 @Injectable()
 export class RedisService {
-  private client = createClient({ url: 'redis://redis:6379' });
+  private client = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+  });
 
   constructor() {
-    this.client.connect();
+    this.client.connect().catch(err => {
+      console.error('Redis connection error:', err);
+    });
+
+    this.client.on('error', (err) => {
+      console.error('Redis error:', err);
+    });
   }
 
   async get(key: string): Promise<string | null> {
