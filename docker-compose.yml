@@ -1,18 +1,35 @@
+version: '3.8'
 services:
-  course-service:
-    build: ./course-service
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3002:3002"
+    volumes:
+      - ./api-gateway:/app
+      - /app/node_modules
+    command: npm run start:dev
+    environment:
+      - NODE_ENV=development
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - COURSE_SERVICE_URL=http://course-service:3000
     depends_on:
-      - mongo
-      - redis
+      - auth-service
+      - course-service
     networks:
       - aladia-net
 
   auth-service:
-    build: ./auth-service
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
     ports:
       - "3001:3001"
+    volumes:
+      - ./auth-service:/app
+      - /app/node_modules
+    command: npm run start:dev
     environment:
       - MONGODB_URI=mongodb://mongo:27017/auth_service
       - JWT_ACCESS_SECRET=your_super_secret_access_key_min_32_chars_123
@@ -24,13 +41,24 @@ services:
     networks:
       - aladia-net
 
-  api-gateway:
-    build: ./api-gateway
+  course-service:
+    build:
+      context: ./course-service
+      dockerfile: Dockerfile
     ports:
-      - "3002:3002"
+      - "3000:3000"
+    volumes:
+      - ./course-service:/app
+      - /app/node_modules
+    command: npm run start:dev
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/course_service
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+      - NODE_ENV=development
     depends_on:
-      - course-service
-      - auth-service
+      - mongo
+      - redis
     networks:
       - aladia-net
 
