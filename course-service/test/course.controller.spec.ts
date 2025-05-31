@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { INestApplication } from '@nestjs/common';
 
 describe('CourseController (e2e)', () => {
@@ -8,7 +7,7 @@ describe('CourseController (e2e)', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [],
     }).compile();
 
     app = module.createNestApplication();

@@ -4,7 +4,7 @@ import { createClient } from 'redis';
 @Injectable()
 export class RedisService {
   private client = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379'
+    url: process.env.REDIS_URL || 'redis://redis:6379'
   });
 
   constructor() {

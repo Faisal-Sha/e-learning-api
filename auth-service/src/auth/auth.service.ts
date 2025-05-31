@@ -1,77 +1,70 @@
-import { Injectable, UnauthorizedException, ConflictException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
-import { User, UserRole } from './entities/user.entity';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    @InjectModel(User.name)
+    private userModel: Model<User>,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
-  async register(dto: RegisterDto) {
-    // Check if user exists
-    const existingUser = await this.userRepository.findOne({
-      where: { email: dto.email }
-    });
+  async register(registerDto: RegisterDto) {
+    const { email, password } = registerDto;
 
+    const existingUser = await this.userModel.findOne({ email }).exec();
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('Email already exists');
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(dto.password, 12);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const user = this.userRepository.create({
-      email: dto.email,
-      password: hashedPassword,
-      role: UserRole.USER,
-    });
+    try {
+      const user = new this.userModel({
+        email,
+        password: hashedPassword,
+        role: 'user',
+      });
 
-    await this.userRepository.save(user);
+      console.log(user);
 
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
-    
-    // Update refresh token
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+      await user.save();
 
-    return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      ...tokens
-    };
+      const tokens = await this.generateTokens(user);
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+      return {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        ...tokens
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error registering user');
+    }
   }
 
-  async login(dto: LoginDto) {
-    // Find user
-    const user = await this.userRepository.findOne({
-      where: { email: dto.email }
-    });
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
 
+    const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate tokens
     const tokens = await this.generateTokens(user);
-    
-    // Update refresh token
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
@@ -84,34 +77,25 @@ export class AuthService {
 
   async logout(userId: string) {
     // Find the user first
-    const user = await this.userRepository.findOne({
-      where: { id: userId }
-    });
+    const user = await this.userModel.findById(userId).exec();
 
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
     // Update user and clear refresh token
-    const result = await this.userRepository.update(userId, {
-      refreshToken: undefined,
-      lastLogoutAt: () => 'CURRENT_TIMESTAMP'
-    });
-
-    if (result.affected === 0) {
-      throw new InternalServerErrorException('Failed to logout');
-    }
+    user.refreshToken = undefined;
+    user.refreshTokenExpiry = undefined;
+    await user.save();
 
     return {
       success: true,
-      message: 'Logged out successfully'
+      message: 'Logged out successfully',
     };
   }
 
   async refreshToken(userId: string, refreshToken: string) {
-    const user = await this.userRepository.findOne({
-      where: { id: userId }
-    });
+    const user = await this.userModel.findById(userId).exec();
 
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -164,7 +148,7 @@ export class AuthService {
 
   private async updateRefreshToken(userId: string, refreshToken: string) {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-    await this.userRepository.update(userId, {
+    await this.userModel.findByIdAndUpdate(userId, {
       refreshToken: hashedRefreshToken,
     });
   }

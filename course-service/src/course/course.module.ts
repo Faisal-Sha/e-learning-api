@@ -10,7 +10,7 @@ import { RedisModule } from '../redis/redis.module';
   imports: [
     MongooseModule.forRootAsync({
       useFactory: async () => ({
-        uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/courses',
+        uri: process.env.MONGODB_URI || 'mongodb://mongo:27017/courses',
       }),
     }),
     MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]),

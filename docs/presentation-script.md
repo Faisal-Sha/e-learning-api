@@ -1,80 +1,63 @@
-# Video Presentation Script
+# E-Learning API Platform Demo Script
+(Duration: 4 minutes)
 
-## 1. Introduction (1-2 minutes)
-- Personal introduction
-- Brief overview of the project
-- Technologies used
-- Problem statement
+## Introduction (30 seconds)
+Hello everyone! Today I'm excited to showcase our E-Learning API platform, a robust microservices-based solution designed for scalability, security, and performance. Let me walk you through the architecture and key features that make this system powerful and efficient.
 
-## 2. Project Structure (2-3 minutes)
-- Show project directory structure
-- Explain microservices architecture
-- Highlight key components:
-  - Course Service
-  - Auth Service
-  - API Gateway
-  - MongoDB
-  - Redis Cache
+## Architecture Overview (45 seconds)
+1. **Microservices Architecture**
+   - We've implemented three core services:
+     - API Gateway (Port 3002)
+     - Course Service (Port 3000)
+     - Auth Service (Port 3001)
+   - Why? This separation allows independent scaling and maintenance
 
-## 3. Code Walkthrough (3-4 minutes)
-- Show and explain key files:
-  - app.module.ts: MongoDB and Redis configuration
-  - course.controller.ts: API endpoints
-  - course.service.ts: Business logic
-  - course.schema.ts: Data model
-  - Global exception filter
-  - Validation DTOs
+2. **Communication Pattern**
+   - External: HTTP for client communication
+   - Internal: TCP for inter-service communication
+   - Why TCP internally?
+     - Lower latency with persistent connections
+     - Reduced protocol overhead
+     - More efficient resource usage
 
-## 4. API Demonstration (3-4 minutes)
-Using Apidog or similar tool, demonstrate:
-1. Creating a new course
-2. Retrieving all courses
-3. Getting a specific course
-4. Updating a course
-5. Deleting a course
-6. Show validation errors
-7. Demonstrate caching behavior
+## Security Features (45 seconds)
+1. **Advanced Authentication**
+   - JWT-based authentication with dual-token system
+     - Access tokens (15 minutes)
+     - Refresh tokens (7 days)
+   - Why? Better security with shorter access token life
 
-## 5. Architecture Decisions (2-3 minutes)
-Explain why you chose:
-- Microservices architecture
-- MongoDB for database
-- Redis for caching
-- Docker for containerization
-- Class-validator for validation
+2. **Security Measures**
+   - Rate limiting (5 requests/minute)
+   - Environment-based JWT secrets
+   - Strong password validation
+   - Why? Protection against brute force and common security threats
 
-## 6. Future Enhancements (1-2 minutes)
-Discuss planned features:
-- User authentication
-- Course categories
-- File uploads
-- Ratings and reviews
-- Payment integration
+## Core Features (60 seconds)
+1. **User Management**
+   - Role-based access (User, Admin, Instructor)
+   - Profile management
+   - Secure logout with token invalidation
+   - Why? Granular access control and security
 
-## 7. Conclusion (1 minute)
-- Recap key features
-- Thank the audience
-- Provide contact information
+2. **Course Management**
+   - Efficient data transfer using binary serialization
+   - Typed message patterns with enums
+   - Interface-based type safety
+   - Why? Optimized performance and type safety
 
-## Technical Setup for Recording
-1. Screen Resolution: 1920x1080
-2. Terminal: Use a clear theme
-3. Editor: VS Code with a readable theme
-4. Browser: Clean profile with Apidog open
-5. Have Docker Desktop running
-6. Terminal commands ready in a script
+## Technical Implementation (45 seconds)
+1. **API Gateway Features**
+   - Smart request forwarding
+   - @Client() decorator for service communication
+   - Clean controller separation
+   - Why? Maintainable and organized code structure
 
-## Key Points to Emphasize
-1. Code organization and cleanliness
-2. Error handling implementation
-3. API documentation
-4. Testing coverage
-5. Scalability considerations
-6. Security measures
+2. **Database Integration**
+   - PostgreSQL with TypeORM
+   - Proper error handling
+   - Audit trail support
+   - Why? Reliable data persistence and tracking
 
-Remember to:
-- Speak clearly and at a moderate pace
-- Keep mouse movements smooth
-- Have all necessary windows readily available
-- Test all demos before recording
-- Keep the presentation flowing naturally
+## Conclusion (15 seconds)
+This architecture provides a solid foundation for scaling our e-learning platform while maintaining security and performance. Thank you for your attention! Any questions?

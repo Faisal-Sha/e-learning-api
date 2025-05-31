@@ -23,8 +23,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
   @Post('login')
@@ -32,8 +32,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'Login successful' })
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
   }
 
   @Post('refresh')
