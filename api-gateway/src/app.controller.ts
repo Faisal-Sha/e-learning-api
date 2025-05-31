@@ -68,23 +68,6 @@ export class AppController {
     }
   }
 
-  @Get('auth/profile')
-  async proxyAuthProfile(@Request() req) {
-    try {
-      const response = await firstValueFrom(
-        this.httpService.get('http://auth-service:3001/auth/profile', {
-          headers: req.headers, // Forward headers (e.g., Authorization)
-        })
-      );
-      return response.data;
-    } catch (error) {
-      throw new HttpException(
-        error.response?.data || 'Error proxying to auth-service',
-        error.response?.status || 500
-      );
-    }
-  }
-
   // Proxy to course-service (port 3000)
   @Get('courses')
   async proxyCoursesGetAll(@Request() req) {

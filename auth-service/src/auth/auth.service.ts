@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException, InternalServerErr
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { User, UserRole } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
@@ -27,15 +27,11 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
-      const user = new this.userModel({
+      const user = await this.userModel.create({
         email,
         password: hashedPassword,
-        role: 'user',
+        role: UserRole.USER,
       });
-
-      console.log(user);
-
-      await user.save();
 
       const tokens = await this.generateTokens(user);
       await this.updateRefreshToken(user.id, tokens.refreshToken);
